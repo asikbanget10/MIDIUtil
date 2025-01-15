@@ -1,0 +1,96 @@
+# Pastikan Anda memasang midiutil:
+# pip install midiutil
+#
+# Kode ini membuat MIDI sederhana dengan chord dan melodi shalawat.
+# Anda dapat membuka file .mid di software DAW/aplikasi audio, lalu
+# mengekspornya ke MP3 atau format lain.
+
+from midiutil import MIDIFile
+
+# Membuat sebuah objek MIDIFile dengan 2 track: 1 track melodi, 1 track chord
+track_melodi = 0
+track_chord = 1
+time = 0  # waktu (beat) awal
+tempo = 70  # BPM (bisa Anda sesuaikan)
+volume = 100
+
+# Membuat objek MIDIFile
+mf = MIDIFile(2)  # 2 track
+mf.addTempo(track_melodi, time, tempo)
+mf.addTempo(track_chord, time, tempo)
+
+# Catatan (pitch) dalam MIDI (C4=60, D4=62, E4=64, F4=65, G4=67, A4=69, B4=71, C5=72, dsb.)
+# Anda bisa mengubah oktaf dan nada untuk menyesuaikan selera
+
+# -----------------------------
+# 1. Bagian Pembukaan (Am - F - G - Am) (lambat)
+# -----------------------------
+# Chord Am: A, C, E
+# Chord F : F, A, C
+# Chord G : G, B, D
+# Chord Am: A, C, E
+
+pembukaan_chords = [
+    [69, 72, 76],  # Am (A4, C5, E5)
+    [65, 69, 72],  # F  (F4, A4, C5)
+    [67, 71, 74],  # G  (G4, B4, D5)
+    [69, 72, 76],  # Am (A4, C5, E5)
+]
+
+durasi_pembukaan = 2  # 2 beat/nada (lambat)
+start_time = 0
+
+for chord in pembukaan_chords:
+    for note in chord:
+        mf.addNote(track_chord, 0, note, start_time, durasi_pembukaan, volume)
+    # Melodi kecil contoh (opsional, diambil dari nada chord)
+    mf.addNote(track_melodi, 0, chord[0], start_time, durasi_pembukaan, volume)
+    start_time += durasi_pembukaan
+
+# -----------------------------
+# 2. Bagian Refrain (C - G - Am - F) (lebih cepat)
+# -----------------------------
+# Chord C  : C, E, G
+# Chord G  : G, B, D
+# Chord Am : A, C, E
+# Chord F  : F, A, C
+
+refrain_chords = [
+    [72, 76, 79],  # C  (C5, E5, G5)
+    [67, 71, 74],  # G  (G4, B4, D5)
+    [69, 72, 76],  # Am (A4, C5, E5)
+    [65, 69, 72],  # F  (F4, A4, C5)
+]
+
+# Kita buat refrainya 2 kali
+durasi_refrain = 1
+for i in range(2):  # Refrain diulang 2 kali
+    for chord in refrain_chords:
+        for note in chord:
+            mf.addNote(track_chord, 0, note, start_time, durasi_refrain, volume)
+        # Melodi satu nada di atas chord, misal nada ke-2 chord
+        mf.addNote(track_melodi, 0, chord[1], start_time, durasi_refrain, volume)
+        start_time += durasi_refrain
+
+# -----------------------------
+# 3. Bagian Penutup (F - G - Am) (kembali lambat, dramatis)
+# -----------------------------
+penutup_chords = [
+    [65, 69, 72],  # F  (F4, A4, C5)
+    [67, 71, 74],  # G  (G4, B4, D5)
+    [69, 72, 76],  # Am (A4, C5, E5)
+]
+
+durasi_penutup = 2
+for chord in penutup_chords:
+    for note in chord:
+        mf.addNote(track_chord, 0, note, start_time, durasi_penutup, volume)
+    # Melodi satu nada paling tinggi pada chord (sering jadi penutup emosional)
+    mf.addNote(track_melodi, 0, chord[-1], start_time, durasi_penutup, volume)
+    start_time += durasi_penutup
+
+# Simpan file MIDI
+with open("shalawat_output.mid", "wb") as output_file:
+    mf.writeFile(output_file)
+
+print("File MIDI 'shalawat_output.mid' berhasil dibuat. Silakan konversi ke MP3.")
